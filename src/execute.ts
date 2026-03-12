@@ -152,7 +152,7 @@ export async function checkBinaries(): Promise<void> {
     } catch (err) {
       const error = err as FfmpegError;
       if (error._tag === "SpawnError") {
-        throw new Error(error.message);
+        throw new Error(error.message, { cause: err });
       }
       // Non-zero exit from -version is fine, as long as the binary exists
     }
