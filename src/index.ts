@@ -43,9 +43,8 @@ server.tool(
 server.tool(
   "find_keyframes",
   "Find keyframe (I-frame) timestamps in a video file. " +
-    "Use this before setting trimStartSeconds in Remotion configs -- " +
-    "landing between keyframes causes frozen frames at scene start. " +
-    "Optionally filter to a time range.",
+    "Use this before trimming video -- landing between keyframes causes " +
+    "frozen frames at the cut point. Optionally filter to a time range.",
   {
     path: z.string().describe("Absolute path to the video file"),
     startTime: z
@@ -76,7 +75,7 @@ server.tool(
 
 server.tool(
   "check_render_ready",
-  "Check if a media file is ready for Remotion rendering. " +
+  "Check if a media file meets production requirements. " +
     "Validates: video codec is H.264, audio sample rate is 48000Hz, " +
     "audio stream exists. If trimStartSeconds is provided, checks " +
     "keyframe alignment and warns if nearest keyframe is >0.5s away. " +
@@ -136,7 +135,7 @@ server.tool(
 function formatTransformResult(result: TransformResult): string {
   const lines: string[] = [];
   if (result.validation.ready) {
-    lines.push("Validation: PASS (Remotion-ready)");
+    lines.push("Validation: PASS (production-ready)");
   } else {
     lines.push("Validation: WARN (issues detected)");
     for (const issue of result.validation.issues) {
@@ -176,8 +175,7 @@ function formatTransformResult(result: TransformResult): string {
 server.tool(
   "strip_audio",
   "Remove the audio track from a video file. Video stream is copied without re-encoding. " +
-    "Use this for b-roll clips where narration plays over the video -- " +
-    "Remotion's OffthreadVideo audio bleeds past Sequence boundaries if not stripped.",
+    "Use this for b-roll clips where separate narration or music plays over the video.",
   {
     inputPath: z.string().describe("Absolute path to the input video file"),
     outputPath: z.string().describe("Absolute path for the output file"),
@@ -200,8 +198,8 @@ server.tool(
 server.tool(
   "reencode_h264",
   "Re-encode a video file to H.264 codec. Use this to fix VP9/WebM files that cause " +
-    "'Failed to fetch' errors in Remotion renders. Audio stream is copied without re-encoding. " +
-    "Includes faststart flag for web playback.",
+    "compatibility issues in video editors and web players. Audio stream is copied without " +
+    "re-encoding. Includes faststart flag for web playback.",
   {
     inputPath: z.string().describe("Absolute path to the input video file"),
     outputPath: z.string().describe("Absolute path for the output file (.mp4)"),
@@ -230,9 +228,9 @@ server.tool(
 
 server.tool(
   "resample_audio",
-  "Resample audio to a target sample rate. Defaults to 48000Hz which is mandatory for Remotion -- " +
-    "44.1kHz audio causes silent drift that compounds over the duration of the video. " +
-    "Video stream is copied without re-encoding.",
+  "Resample audio to a target sample rate. Defaults to 48000Hz, the standard for video " +
+    "production. 44.1kHz audio causes silent drift that compounds over the duration of " +
+    "the video. Video stream is copied without re-encoding.",
   {
     inputPath: z.string().describe("Absolute path to the input media file"),
     outputPath: z.string().describe("Absolute path for the output file"),
@@ -260,9 +258,8 @@ server.tool(
 server.tool(
   "crop_portrait",
   "Crop a landscape (16:9) video to portrait (9:16) format. Calculates crop dimensions " +
-    "from source resolution and scales to target size. Audio is stripped (b-roll pattern). " +
-    "Use xOffset to control which horizontal slice of the frame is visible -- " +
-    "objectFit:cover in Remotion center-crops ~34% off each side which often cuts important content.",
+    "from source resolution and scales to target size. Audio is stripped. " +
+    "Use xOffset to control which horizontal slice of the frame is visible.",
   {
     inputPath: z.string().describe("Absolute path to the input video file"),
     outputPath: z.string().describe("Absolute path for the output file"),
@@ -309,8 +306,7 @@ server.tool(
 server.tool(
   "extract_audio",
   "Extract the audio track from a video file. Outputs WAV (PCM 16-bit) or MP3. " +
-    "Always resamples to 48000Hz. Use this before sending audio to ElevenLabs " +
-    "for voice isolation.",
+    "Always resamples to 48000Hz. Useful for voice isolation or audio-only workflows.",
   {
     inputPath: z.string().describe("Absolute path to the input video file"),
     outputPath: z.string().describe("Absolute path for the output audio file (.wav or .mp3)"),
