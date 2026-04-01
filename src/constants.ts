@@ -26,7 +26,7 @@ export const ALLOWED_EXTENSIONS = new Set([
   ".ts", ".mts", ".m2ts", ".ogg", ".opus",
 ]);
 
-export const DANGEROUS_PATH_CHARS = /[;&|`$(){}!<>]/;
+export const DANGEROUS_PATH_CHARS = /[;&|`{}<>]/;
 
 export const MIN_FILE_SIZE = 1024;
 

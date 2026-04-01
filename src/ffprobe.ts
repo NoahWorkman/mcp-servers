@@ -71,6 +71,25 @@ export function toMediaInfo(raw: RawProbeOutput): MediaInfo {
   const audioStream = streams.find((s) => s.type === "audio");
   const format = toFormatInfo(raw.format ?? ({} as RawProbeFormat));
 
+  // Prefer stream-level duration when format duration is unreliable.
+  // Container metadata can be stale after stream copies or format conversions.
+  const maxStreamDuration = Math.max(
+    ...streams.map((s) => s.duration ?? 0),
+    0,
+  );
+  if (
+    maxStreamDuration > 0 &&
+    format.duration > 0 &&
+    Math.abs(maxStreamDuration - format.duration) / format.duration > 0.1
+  ) {
+    return {
+      format: { ...format, duration: maxStreamDuration },
+      streams,
+      videoStream,
+      audioStream,
+    };
+  }
+
   return { format, streams, videoStream, audioStream };
 }
 
